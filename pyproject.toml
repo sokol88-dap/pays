@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75"]
+requires = ["setuptools>=84.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,8 +11,8 @@ dependencies = [
     "fastapi>=0.115,<1",
     "pydantic>=2.9,<3",
     "pydantic-settings>=2.6,<3",
-    "sqlalchemy[asyncio,postgresql-asyncpg]>=2.0,<2.1",
-    "faststream[rabbit]>=0.6,<0.7",
+    "sqlalchemy[asyncio,postgresql-asyncpg]>=2.1.2,<2.2",
+    "faststream[rabbit]>=0.7.7,<0.8",
     "alembic>=1.14,<2",
     "httpx>=0.28,<1",
     "uvicorn>=0.34,<1",
