@@ -1,0 +1,86 @@
+name: pays
+
+x-application: &application
+  build: .
+  environment: &environment
+    API_KEY: ${API_KEY:?Set API_KEY in .env; see .env.example}
+    DATABASE_URL: postgresql+asyncpg://pays:${POSTGRES_PASSWORD:-pays}@postgres:5432/pays
+    RABBITMQ_URL: amqp://pays:${RABBITMQ_PASSWORD:-pays}@rabbitmq:5672/
+    WEBHOOK_TIMEOUT_SECONDS: ${WEBHOOK_TIMEOUT_SECONDS:-10}
+    OUTBOX_POLL_SECONDS: ${OUTBOX_POLL_SECONDS:-1}
+    OUTBOX_BATCH_SIZE: ${OUTBOX_BATCH_SIZE:-50}
+    PUBLISH_TIMEOUT_SECONDS: ${PUBLISH_TIMEOUT_SECONDS:-10}
+  restart: unless-stopped
+  init: true
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: pays
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pays}
+      POSTGRES_DB: pays
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pays -d pays"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: pays
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-pays}
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    <<: *application
+    command: >-
+      sh -c "alembic upgrade head &&
+      exec uvicorn src.api:create_app --factory --host 0.0.0.0 --port 8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import os, urllib.request;
+          request = urllib.request.Request('http://localhost:8000/health',
+          headers={'X-API-Key': os.environ['API_KEY']});
+          urllib.request.urlopen(request, timeout=3)
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  consumer:
+    <<: *application
+    command: ["python", "-m", "src.worker"]
+    stop_grace_period: 40s
+    depends_on:
+      api:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
