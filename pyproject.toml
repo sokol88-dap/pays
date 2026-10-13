@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75"]
+requires = ["setuptools>=84.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,11 +8,11 @@ version = "0.1.0"
 description = "Asynchronous payment processing with a transactional outbox"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.115,<1",
-    "pydantic>=2.9,<3",
+    "fastapi>=0.143.0,<1",
+    "pydantic>=2.14.0,<3",
     "pydantic-settings>=2.6,<3",
-    "sqlalchemy[asyncio,postgresql-asyncpg]>=2.0,<2.1",
-    "faststream[rabbit]>=0.6,<0.7",
+    "sqlalchemy[asyncio,postgresql-asyncpg]>=2.1.4,<2.2",
+    "faststream[rabbit]>=0.7.7,<0.8",
     "alembic>=1.14,<2",
     "httpx>=0.28,<1",
     "uvicorn>=0.34,<1",
@@ -22,7 +22,7 @@ dependencies = [
 dev = [
     "pytest>=8,<10",
     "pytest-asyncio>=1,<2",
-    "ruff>=0.12,<1",
+    "ruff>=0.17.0,<1",
     "mypy>=2.4,<3",
     "pyright[nodejs]>=1.1.414,<2",
 ]

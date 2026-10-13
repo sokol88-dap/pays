@@ -1,8 +1,8 @@
-fastapi==0.142.2
-pydantic==2.13.5
+fastapi==0.143.0
+pydantic==2.14.0
 pydantic-settings==2.15.0
-SQLAlchemy[asyncio,postgresql-asyncpg]==2.0.54
-faststream[rabbit]==0.6.7
+SQLAlchemy[asyncio,postgresql-asyncpg]==2.1.4
+faststream[rabbit]==0.7.7
 alembic==1.20.0
 httpx==0.28.1
 uvicorn==0.54.0
